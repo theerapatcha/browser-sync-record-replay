@@ -7,7 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-  	"my-bs-plugin": "file:../my-bs-plugin"
+  	"my-bs-plugin": "file:../"
   },
   "author": "",
   "license": "ISC"
