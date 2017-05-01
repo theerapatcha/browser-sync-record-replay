@@ -44,28 +44,51 @@ var socketCallbacks = {
         console.log("there is a click");
     }
 }
+var cached = [];
 var funcs = function (bs, eventManager) {
         console.log("there is a click");
     };
-var plugin = function (opts, bs, clientEvents, d)  {
-    console.log(bs.io);
-    console.log(clientEvents);
-    console.log(d);
+var handleClientEvent = function(event, client, data) {
+    console.log("there is a "+event+" from "+client);
+    console.log(data);
+    cached.push({
+        event: event,
+        data: data
+    });
+
+}
+var plugin = function (opts, bs)  {
     var emitter = bs.emitter;
     var socket = bs.io.sockets;
-    var clientEvents = bs.options.get("clientEvents").toJS();
-    console.log(clientEvents);
-    console.log(socket);
+    socket.on("connection", handleConnection);
+    /**
+     * Handle each new connection
+     * @param {Object} client
+     */
+    function handleConnection (client) {
+        var clientEvents = bs.options.get("clientEvents").toJS();
+        console.log(clientEvents);
+        _.each(clientEvents, function (event) {
+            console.log(event);
+            client.on(event, handleClientEvent.bind(null, event, client));
+        });
+        var i = 0;
+        _.each(cached, function(e){
+            i++;
+            console.log(e.event);
+            setTimeout(function(){
+                client.emit(e.event, e.data);
+            }, i*10);
+            
+        });
+        
+    }
      _.each(emitterCallbacks, function (func, event) {
         emitter.on(event, func.bind(this, bs));
     });
-     _.each(clientEvents, function (event) {
-         console.log(event);
-        socket.on(event, funcs.bind(this, bs));
-    });
+     
     return undefined;
 };
-
 
 module.exports = {
   "plugin:name": "my-bs-plugin",
