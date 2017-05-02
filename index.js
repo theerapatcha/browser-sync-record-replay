@@ -49,20 +49,23 @@ var emitterCallbacks = {
     "record:play": function (bs, data) {
         console.log("Record:Play triggered");
         var clients = bs.io.of(bs.options.getIn(["socket", "namespace"]));
-        //TOOD fetch data from firebase first!
-        // clients.emit(e.event, e.data);
         var ref = admin.database().ref(data);
         ref.on('value', function (s) {
             var obj = s.val();
+            var lastValue = undefined;
             var diff = 0;
             for (var k in obj) {
-
+                lastValue = lastValue || k;
+                var tempDiff = (k - lastValue);
+                tempDiff = tempDiff > 200 ? tempDiff : 200;
+                diff += tempDiff;
+                lastValue = k;
                 var val = obj[k];
                 (function (val) {
                     setTimeout(function () {
                         console.log(val);
                         clients.emit(val.event, val.data);
-                    }, 200);
+                    }, diff);
                 })(val);
             }
         });
