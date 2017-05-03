@@ -38,7 +38,7 @@ module.exports.callbacks = {
             for (var k in obj) {
                 lastValue = lastValue || k;
                 var tempDiff = (k - lastValue);
-                tempDiff = tempDiff > 200 ? tempDiff : 200;
+                tempDiff = tempDiff > 20 ? tempDiff : 20;
                 diff += tempDiff;
                 lastValue = k;
                 var val = obj[k];
