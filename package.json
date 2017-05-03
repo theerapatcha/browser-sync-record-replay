@@ -10,7 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "firebase-admin": "^4.2.1",
-    "browser-sync": "file:../browser-sync/"
+    "browser-sync": "^2.18.8"
   },
   "browser-sync:ui": {
     "hooks": {
