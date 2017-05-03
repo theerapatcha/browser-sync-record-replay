@@ -1,46 +1,27 @@
 "use strict";
 var _ = require("browser-sync/lodash.custom");
 
-var admin = require("firebase-admin");
-var serviceAccount = require("./firebase-config.json");
-admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
-    databaseURL: "https://browser-sync-record.firebaseio.com"
-});
+var path = require("path");
+var uiPlugin = require("./ui/record.plugin");
+var firebaseStorage = require("./storages/firebase");
 
-// module.exports.callbacks = {
-//     "service:running": function (bs, data) {
-//         console.log("Hello from the other side");
-//     }
-// }
+const PLUGIN_NAME  = "Record";
 
-// /**
-//  * Plugin interface for BrowserSync
-//  * @param {EventEmitter} emitter
-//  * @param {BrowserSync} bs
-//  * @returns {Object}
-//  */
-// module.exports.plugin = function (emitter, bs) {
-//     console.log(bs);
-//     console.log("Test");
-//      _.each(exports.callbacks, function (func, event) {
-//         emitter.on(event, func.bind(this, bs));
-//     });
-//     return undefined;
-// };
-////////////////////////////////////////////////////////////////////////////////////
 /**
- * Plugin interface for BrowserSync
+ * Plugin name
  */
+module.exports["plugin:name"] = PLUGIN_NAME
 
-var emitterCallbacks = {
+var cached = {};
+module.exports.callbacks = {
     "service:running": function (bs, data) {
         console.log("Hello from the other side");
+        
     },
     "client:events": function (bs, data) {
         console.log(data);
     },
-    "client:connected": function (bs, data) {
+    "client:connected": function (bs, data,z) {
         console.log(data);
     },
     "client:js": function (bs, data) {
@@ -49,8 +30,8 @@ var emitterCallbacks = {
     "record:play": function (bs, data) {
         console.log("Record:Play triggered");
         var clients = bs.io.of(bs.options.getIn(["socket", "namespace"]));
-        var ref = admin.database().ref(data);
-        ref.on('value', function (s) {
+        firebaseStorage.get(data).then(function (s) {
+            console.log(s);
             var obj = s.val();
             var lastValue = undefined;
             var diff = 0;
@@ -63,64 +44,88 @@ var emitterCallbacks = {
                 var val = obj[k];
                 (function (val) {
                     setTimeout(function () {
-                        console.log(val);
                         clients.emit(val.event, val.data);
                     }, diff);
                 })(val);
             }
-        });
+            setTimeout(function () {
+                clients.emit("browser:notify", "Done playing all records");
+            }, diff);
+        }).catch(console.log);
+        clients.emit("browser:notify", "Recoring is playing");
+    },
+    "record:start": function (bs) {
+        console.log("do start");
+        bs.setOptionIn(["record","start"], true);
+        var clients = bs.io.of(bs.options.getIn(["socket", "namespace"]));
+        clients.emit("browser:notify", "Recording started");
+        cached = {};
+    },
+    "record:stop": function (bs) {
+        console.log("do stop");
+         bs.setOptionIn(["record","start"], false);
+        var clients = bs.io.of(bs.options.getIn(["socket", "namespace"]));
+        clients.emit("browser:notify", "Recoring stopped");
+        var recordingId = (new Date()).getTime();
+        firebaseStorage.store(recordingId, cached);
     }
+
 };
+/**
+ * @type {{plugin: Function, plugin:name: string, markup: string}}
+ */
+module.exports.plugin = function (opts, bs) {
+    var ui = bs.ui;
+    uiPlugin.plugin(ui, bs);
 
-// var cached = [];
+    // var admin = require("firebase-admin");
+    // var serviceAccount = require("./firebase-config.json");
+    // admin.initializeApp({
+    //     credential: admin.credential.cert(serviceAccount),
+    //     databaseURL: "https://browser-sync-record.firebaseio.com"
+    // });
 
-// var handleClientEvent = function (event, client, data) {
-//     console.log("there is a " + event + " from " + client);
-//     console.log(data);
-//     cached.push({
-//         event: event,
-//         data: data
-//     });
-//
-// };
-
-var plugin = function (opts, bs) {
     var emitter = bs.emitter;
-    // var socket = bs.io.sockets;
-    // socket.on("connection", handleConnection);
-    /**
-     * Handle each new connection
-     * @param {Object} client
-     */
-    // function handleConnection(client) {
-    //     var clientEvents = bs.options.get("clientEvents").toJS();
-    //     console.log(clientEvents);
-    //     _.each(clientEvents, function (event) {
-    //         console.log(event);
-    //         client.on(event, handleClientEvent.bind(null, event, client));
-    //     });
-    //     var i = 0;
-    //     _.each(cached, function (e) {
-    //         i++;
-    //         console.log(e.event);
-    //         setTimeout(function () {
-    //             client.emit(e.event, e.data);
-    //         }, i * 10);
-    //
-    //     });
-    //
-    // }
-
-    _.each(emitterCallbacks, function (func, event) {
+    _.each(exports.callbacks, function (func, event) {
+        console.log(event);
         emitter.on(event, func.bind(this, bs));
     });
+    
 
-    return undefined;
-};
+    var registerSocketForClientEvent = function (clientEvents, client) {
+        _.each(clientEvents, function(event) {
+            console.log(event);
+            client.on(event, storeInCache.bind(null, event, bs));
+        });
+    };
+    var storeInCache = function (event, bs, data) {
+        console.log(bs.options.get('record') && bs.options.get('record').get('start'));
+        if (bs.options.get('record') && bs.options.get('record').get('start')) {
+            var timestamp = new Date().getTime();
+            cached[timestamp] = {       //TODO
+                event: event,
+                data: data,
+                timestamp: timestamp
+            };
+        }
+    }
+    // var storeFunction = function (event, data) {
+    //     if (bs.options.get('record') && bs.options.get('record').get('start')) {
+    //         if (!recordingId) {
+    //             recordingId = 'rec-' + (new Date()).getTime();
+    //         }
+    //         var timestamp = (new Date()).getTime();
+    //         admin.database().ref(recordingId + '/' + timestamp).set({       //TODO
+    //             event: event,
+    //             data: data,
+    //             timestamp: timestamp
+    //         });
+    //     } else {
+    //         recordingId = undefined;
+    //     }
+    // }
+    var socket = bs.io.sockets;
+    var clientEvents = bs.options.get("clientEvents").toJS();
+    socket.on("connection", registerSocketForClientEvent.bind(null, clientEvents))
 
-module.exports = {
-    "plugin:name": "my-bs-plugin",
-    "plugin": plugin
-};
-
-console.log("My BS Plugin got invoked");
+}

@@ -62,7 +62,11 @@ module.exports = {
     "reloadDelay": 0,
     "reloadDebounce": 0,
     "reloadThrottle": 0,
-    "plugins": [ myPlugin ],
+    "plugins": [ 
+        {
+            module: myPlugin
+        }
+    ],
     "injectChanges": true,
     "startPath": null,
     "minify": true,

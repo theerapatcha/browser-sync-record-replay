@@ -1,0 +1,43 @@
+<section>
+<div>
+    <button bs-button="icon-left inline" ng-click="ctrl.clickStart()" ng-disabled="ctrl.isStarted">
+    <svg bs-svg-icon><use xlink:href="#svg-circle-plus"></use></svg>
+    Start
+</button>
+    <button bs-button="icon-left inline" ng-click="ctrl.clickStop()" ng-disabled="!ctrl.isStarted">
+    <svg bs-svg-icon><use xlink:href="#svg-circle-pause"></use></svg>
+    Stop
+</button>
+</div>
+<div ng-repeat="record in ctrl.records | orderBy: '-key' ">
+
+    <div bs-button-row>
+        <span>
+        Record Id: {{ record.key | date : 'medium'}}
+        <button bs-button="icon-left inline" ng-click="ctrl.clickPlay(record.key)" ng-disabled="ctrl.isStarted">
+            <svg bs-svg-icon><use xlink:href="#svg-circle-play"></use></svg>
+            Play
+        </button>
+        </span>
+    </div>
+    <ul bs-list="bordered inline-controls" ng-if="record.recordedEvents" id="bs-history-list">
+        <li ng-repeat="(key, value) in record.recordedEvents track by $index">
+            <p>URL: {{value.data.url}} Event: {{value.event}} Timestamp:  {{ key | date : 'medium'}} </p>
+            <div bs-button-group>
+                <!--<new-tab url="{{ctrl.utils.localUrl(url.path)}}" mode="options.mode"></new-tab>
+                <a href="#"
+                title="Sync all devices to this address."
+                bs-button="subtle-alt icon-left"
+                ng-class="{success: url.success}"
+                >
+                    <icon icon="circle-ok" bs-state="success"></icon>
+                    <icon icon="syncall"   bs-state="default"></icon> Sync all
+                </a>
+                <a href="#" bs-button="subtle-alt icon" bs-remove>
+                    <icon icon="bin"></icon>
+                </a>-->
+            </div>
+        </li>
+    </ul>
+</div>
+</section>

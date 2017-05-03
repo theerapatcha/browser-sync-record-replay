@@ -7,8 +7,23 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-  	"my-bs-plugin": "file:../"
+  	"my-bs-plugin": "file:.."
   },
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "browser-sync:ui": {
+    "hooks": {
+      "markup": "../ui/record.html",
+      "templates": ["../ui/record.html"],
+      "client:js": ["../ui/record.client.js"],
+      "page": {
+            "path": "/record",
+            "title": "Record Replay",
+            "template": "record.html",
+            "controller": "RecordController",
+            "order": 4,
+            "icon": "bug"
+      }
+    }
+  }
 }

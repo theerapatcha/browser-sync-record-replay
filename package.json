@@ -9,7 +9,14 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "browser-sync": "^2.18.8",
-    "firebase-admin": "^4.2.1"
+    "firebase-admin": "^4.2.1",
+    "browser-sync": "file:../browser-sync/"
+  },
+  "browser-sync:ui": {
+    "hooks": {
+      "markup": "ui/record.html",
+      "templates": ["ui/record.directive.html"],
+      "client:js": ["ui/record.client.js"]
+    }
   }
 }
