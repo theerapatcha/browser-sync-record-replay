@@ -19,7 +19,7 @@
                     "pluginOpts": "=",
                     "uiOptions": "="
                 },
-                templateUrl: "record/record.directive.html",
+                templateUrl: "record-&-replay/record.directive.html",
                 controller: ["$scope", "Socket", "pagesConfig", "$timeout", "$rootScope", RecordDirective],
                 controllerAs: "ctrl"
             };

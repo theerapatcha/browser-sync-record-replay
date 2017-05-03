@@ -5,7 +5,7 @@ var path = require("path");
 var uiPlugin = require("./ui/record.plugin");
 var firebaseStorage = require("./storages/firebase");
 
-const PLUGIN_NAME  = "Record";
+const PLUGIN_NAME  = "Record & Replay";
 
 /**
  * Plugin name
@@ -49,10 +49,10 @@ module.exports.callbacks = {
                 })(val);
             }
             setTimeout(function () {
-                clients.emit("browser:notify", "Done playing all records");
+                clients.emit("browser:notify", "Replaying finished");
             }, diff);
         }).catch(console.log);
-        clients.emit("browser:notify", "Recoring is playing");
+        clients.emit("browser:notify", "Replaying started");
     },
     "record:start": function (bs) {
         console.log("do start");
