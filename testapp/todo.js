@@ -2,12 +2,10 @@
 
 var browserSync = require("browser-sync");
 var config = {
-    // proxy: "http://todomvc.com/examples/backbone/",
     proxy: "http://getbootstrap.com/javascript/",
-    // proxy: 'https://www.w3schools.com/angular/tryit.asp?filename=try_ng_todo_app',
     //files: ["app/css/*.css"]
     minify: false,
-    "plugins": [ "my-bs-plugin" ]
+    "plugins": [ "browser-sync-record-replay" ]
 };
 
 browserSync.init(config, function (err, bs) {

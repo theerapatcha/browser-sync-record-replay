@@ -7,7 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-  	"my-bs-plugin": "git+https://github.com/theerapatcha/my-bs-plugin"
+  	"my-bs-plugin": "git+https://github.com/theerapatcha/browser-sync-record-replay"
   },
   "author": "",
   "license": "ISC"
