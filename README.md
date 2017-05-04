@@ -8,9 +8,11 @@ How to compile :
 6. We have included a sample in testapp/todo.js within the source-code which demonstrates how to enable the plugin to be used within browser-sync
 
 How to execute the example :
-1. Execute the following command - "cd testapp/"
-2. Execute the following command - "node todo.js"
-3. Notice the messages on console which prints the url which can be opened in the browser.
+1. cd into the testapp directory within source-code using the following command :
+"cd testapp/"
+2. Install dependencies by executing the following command : "npm install"
+3. Execute the following command - "node todo.js"; this will start the browser sync server, proxying http://getbootstrap.com/
+4. Notice the messages on console which prints the url to be opened in the browser.
 
 
 How to record and replay actions :
